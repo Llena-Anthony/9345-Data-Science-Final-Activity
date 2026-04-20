@@ -112,7 +112,7 @@ def check_label_column(col: pd.Series) -> None:
         if suspicious.empty:
             print(f"   ✅ All mineral names are clean (no suspicious characters).")
         else:
-            print(f"   ⚠️  Mineral names with corrupted characters: {sorted(suspicious.unique().tolist())}")
+            print(f"   ⚠️  Mineral names with special characters (verify if corrupted): {sorted(suspicious.unique().tolist())}")
     else:
         print(f"   ❌ '{LABEL_COL}' is numeric (dtype: {col.dtype}) — appears already encoded, expected raw strings.")
 
