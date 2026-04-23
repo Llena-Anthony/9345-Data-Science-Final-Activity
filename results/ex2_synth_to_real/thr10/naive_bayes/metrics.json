@@ -1,0 +1,15 @@
+{
+    "accuracy": 0.17201078813305365,
+    "macro_precision": 0.6370826430890935,
+    "macro_recall": 0.5921317093060764,
+    "macro_f1": 0.5349976509091168,
+    "weighted_f1": 0.18927287514256808,
+    "experiment": "ex2_synth_to_real",
+    "threshold": "thr10",
+    "model": "naive_bayes",
+    "train_rows": 684096,
+    "test_rows": 6674,
+    "total_classes_synthetic": 391,
+    "total_classes_test": 85,
+    "evaluated_classes": 72
+}

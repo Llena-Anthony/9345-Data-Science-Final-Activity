@@ -1,6 +1,6 @@
 """
 Description:
-This script runs Experiment 3: Hybrid mineral classification.
+This script runs Experiment 2: Hybrid mineral classification.
 This code was used for the feasibility testing of the research project itself
 you may start from the very scrap or make reference of this code.
 

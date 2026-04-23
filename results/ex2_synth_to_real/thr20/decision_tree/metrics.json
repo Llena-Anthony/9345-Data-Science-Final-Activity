@@ -1,0 +1,15 @@
+{
+    "accuracy": 0.5656519763743753,
+    "macro_precision": 0.5857182570960274,
+    "macro_recall": 0.6116821049888422,
+    "macro_f1": 0.5522251755319367,
+    "weighted_f1": 0.5263085203578033,
+    "experiment": "ex2_synth_to_real",
+    "threshold": "thr20",
+    "model": "decision_tree",
+    "train_rows": 415518,
+    "test_rows": 6603,
+    "total_classes_synthetic": 391,
+    "total_classes_test": 55,
+    "evaluated_classes": 45
+}
