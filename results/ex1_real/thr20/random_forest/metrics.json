@@ -1,0 +1,14 @@
+{
+    "accuracy": 0.9897663641629658,
+    "macro_precision": 0.9792971993955006,
+    "macro_recall": 0.9378967433727973,
+    "macro_f1": 0.9528608938578974,
+    "weighted_f1": 0.9894613528750212,
+    "experiment": "ex1_real",
+    "threshold": "thr20",
+    "train_rows": 41431,
+    "test_rows": 10358,
+    "total_classes_train": 55,
+    "total_classes_test": 55,
+    "evaluated_classes": 55
+}

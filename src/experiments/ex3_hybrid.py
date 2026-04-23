@@ -87,7 +87,6 @@ def compute_metrics(y_true, y_pred):
         ),
     }
 
-
 def save_outputs(output_dir, metrics, y_true, y_pred, labels):
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -169,12 +168,15 @@ def sample_synthetic_data(synth_df, train_classes):
         else:
             print("✔ Global sample size exceeds available rows; all filtered rows kept")
 
+
     elif SYNTHETIC_SAMPLE_MODE == "per_class_cap":
-        synth_df = (
-            synth_df.groupby(TARGET_COL, group_keys=False)
-            .apply(lambda x: x.sample(min(len(x), PER_CLASS_SYNTHETIC_CAP), random_state=RANDOM_STATE))
-            .reset_index(drop=True)
-        )
+        sampled_parts = []
+        for class_name, group in synth_df.groupby(TARGET_COL, group_keys=False):
+            sampled_parts.append(
+                group.sample(min(len(group), PER_CLASS_SYNTHETIC_CAP), random_state=RANDOM_STATE)
+            )
+        synth_df = pd.concat(sampled_parts, ignore_index=True)
+
         print(
             "✔ Applied per-class synthetic cap: "
             f"maximum {PER_CLASS_SYNTHETIC_CAP:,} rows per class"
