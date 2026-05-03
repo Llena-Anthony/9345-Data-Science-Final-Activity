@@ -1,0 +1,9 @@
+gradio
+imbalanced-learn
+joblib
+kagglehub
+matplotlib
+numpy
+pandas
+Pillow
+scikit-learn
