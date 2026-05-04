@@ -23,7 +23,9 @@ def get_default_models(random_state: int = RANDOM_STATE) -> dict[str, object]:
 def train_models(
     models: dict[str, object], X_train: np.ndarray, y_train: np.ndarray
 ) -> dict[str, object]:
-    for model in models.values():
+    for name, model in models.items():
+        print(f"Training {name}...")
         model.fit(X_train, y_train)
+        print(f"{name} done.")
     return models
 

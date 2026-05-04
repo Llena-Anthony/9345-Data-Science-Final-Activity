@@ -42,25 +42,34 @@ def run_training_pipeline(
     index_csv = processed_dir / IMAGE_INDEX_FILENAME
     features_csv = processed_dir / STRUCTURED_FEATURES_FILENAME
 
+    print("[1/6] Building image index...")
     index_df = build_image_index(dataset_dir)
     index_df.to_csv(index_csv, index=False)
+    print(f"      Found {len(index_df)} images across {index_df['label'].nunique()} classes.")
 
+    print("[2/6] Extracting features...")
     feature_df = create_or_load_structured_csv(
         index_df=index_df,
         csv_path=features_csv,
         overwrite=overwrite_features,
     )
+    print(f"      Feature matrix shape: {feature_df.shape}")
 
+    print("[3/6] Preprocessing labels and splitting data...")
     X, label_series = split_features_and_labels(feature_df)
     y, label_encoder = encode_labels(label_series)
-
     X_train, X_test, y_train, y_test = train_test_split_stratified(X, y)
-    X_train_bal, y_train_bal = apply_smote(X_train, y_train)
+    print(f"      Train: {len(X_train)} samples | Test: {len(X_test)} samples")
 
+    print("[4/6] Applying SMOTE...")
+    X_train_bal, y_train_bal = apply_smote(X_train, y_train)
+    print(f"      Balanced train size: {len(X_train_bal)} samples")
+
+    print("[5/6] Training models...")
     models = get_default_models()
     trained_models = train_models(models, X_train_bal, y_train_bal)
-    save_model_artifacts(trained_models, label_encoder, models_dir)
 
+    print("[6/6] Evaluating models...")
     summary_df = evaluate_models(
         models=trained_models,
         X_test=X_test,
@@ -68,7 +77,11 @@ def run_training_pipeline(
         label_encoder=label_encoder,
         results_dir=results_dir,
     )
+    save_model_artifacts(trained_models, label_encoder, models_dir)
+
+    print("\nResults:")
     print(summary_df.sort_values("accuracy", ascending=False).to_string(index=False))
+    print("\nPipeline complete.")
 
 
 def parse_args() -> argparse.Namespace:
