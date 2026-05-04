@@ -19,10 +19,13 @@ def run_training_pipeline(
     models_dir: Path,
     results_dir: Path,
     overwrite_features: bool = False,
+    n_pca_components: int | float | None = 0.95,
 ) -> None:
     from src.data.inspection import build_image_index
+    from src.dimensionality.pca import fit_pca, transform_with_pca
     from src.evaluation.metrics import evaluate_models
     from src.features.pixel_features import create_or_load_structured_csv
+    from src.features.scaling import fit_transform_scaler, transform_with_scaler
     from src.preprocessing.label_encoding import (
         encode_labels,
         split_features_and_labels,
@@ -57,13 +60,28 @@ def run_training_pipeline(
     X_train, X_test, y_train, y_test = train_test_split_stratified(X, y)
     X_train_bal, y_train_bal = apply_smote(X_train, y_train)
 
+    # Apply scaler
+    X_train_scaled, scaler = fit_transform_scaler(X_train_bal)
+    X_test_scaled = transform_with_scaler(X_test, scaler)
+
+    # Apply PCA
+    X_train_reduced, pca = fit_pca(X_train_scaled, n_components=n_pca_components)
+    X_test_reduced = transform_with_pca(X_test_scaled, pca)
+
+    n_components_kept = pca.n_components_
+    variance_explained = pca.explained_variance_ratio_.sum()
+    print(
+        f"PCA: reduced {X_train_scaled.shape[1]} features -> {n_components_kept} components "
+        f"({variance_explained:.1%} variance retained)"
+    )
+
     models = get_default_models()
-    trained_models = train_models(models, X_train_bal, y_train_bal)
-    save_model_artifacts(trained_models, label_encoder, models_dir)
+    trained_models = train_models(models, X_train_reduced, y_train_bal)
+    save_model_artifacts(trained_models, label_encoder, models_dir, scaler, pca)
 
     summary_df = evaluate_models(
         models=trained_models,
-        X_test=X_test,
+        X_test=X_test_reduced,
         y_test=y_test,
         label_encoder=label_encoder,
         results_dir=results_dir,
@@ -104,15 +122,27 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Regenerate structured features CSV even if it exists.",
     )
+    parser.add_argument(
+        "--pca-components",
+        type=float,
+        default=0.95,
+        help="PCA components to keep.",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
+    n_components: int | float = (
+        int(args.pca_components)
+        if args.pca_components >= 1
+        else args.pca_components
+    )
     run_training_pipeline(
         dataset_dir=args.dataset_dir,
         processed_dir=args.processed_dir,
         models_dir=args.models_dir,
         results_dir=args.results_dir,
         overwrite_features=args.overwrite_features,
+        n_pca_components=n_components,
     )

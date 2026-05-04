@@ -9,7 +9,7 @@ from src.preprocessing.image_preprocessing import to_rgb_resized_array
 from src.utils.io import load_model_artifacts
 
 
-def load_artifacts(models_dir: str | Path) -> tuple[dict[str, object], object]:
+def load_artifacts(models_dir: str | Path) -> tuple[dict[str, object], object, object, object]:
     return load_model_artifacts(models_dir=models_dir)
 
 
@@ -18,22 +18,27 @@ def classify_mineral(
     model_name: str,
     models: dict[str, object],
     label_encoder,
+    scaler,
+    pca,
     size: tuple[int, int] = IMAGE_SIZE,
 ) -> tuple[str, dict[str, float]]:
     if model_name not in models:
         raise ValueError(f"Model '{model_name}' is not loaded.")
 
     features = to_rgb_resized_array(image=image, size=size).flatten().reshape(1, -1)
+
+    features_scaled = scaler.transform(features)
+    features_reduced = pca.transform(features_scaled)
+
     model = models[model_name]
-    pred_index = int(model.predict(features)[0])
+    pred_index = int(model.predict(features_reduced)[0])
     pred_label = str(label_encoder.inverse_transform([pred_index])[0])
 
     confidence: dict[str, float] = {}
     if hasattr(model, "predict_proba"):
-        probs = model.predict_proba(features)[0]
+        probs = model.predict_proba(features_reduced)[0]
         for idx, prob in enumerate(probs):
             label = str(label_encoder.inverse_transform([idx])[0])
             confidence[label] = float(prob)
 
     return pred_label, confidence
-
